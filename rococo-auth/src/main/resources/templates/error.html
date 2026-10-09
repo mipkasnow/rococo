@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+<head>
+    <title>Rococo | Error</title>
+    <link rel="icon" th:href="@{/images/favicon.ico}"/>
+    <link th:href="@{/styles/styles.css}" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<main>
+    <div class="wrapper">
+        <section class="content">
+            <div class="form">
+                <h1 class="form__header">Ro<span class="form__text_gold">coco</span></h1>
+                <p class="form__error" th:text="|Error [[${status}]] [[${error}]]|">Unexpected error</p>
+                <p class="form__paragraph" th:if="${message}" th:text="${message}">Something went wrong.</p>
+                <p class="form__paragraph" th:if="${path}" th:text="|Path: [[${path}]]|">Path: /</p>
+                <p class="form__paragraph">
+                    <a class="form__link" th:href="@{|${frontUri}|}">Back to Rococo</a>
+                </p>
+            </div>
+            <img class="content__image" src="../static/images/hermitage.jpg" th:src="@{/images/hermitage.jpg}" alt="Эрмитаж"/>
+        </section>
+    </div>
+</main>
+</body>
+</html>
