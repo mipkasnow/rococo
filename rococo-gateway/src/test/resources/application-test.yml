@@ -1,0 +1,10 @@
+spring:
+  kafka:
+    admin:
+      fail-fast: false
+    listener:
+      missing-topics-fatal: false
+
+logging:
+  level:
+    root: WARN

@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import mipkasnow.dev.rococo.dto.artist.ArtistCreateRequest;
 import mipkasnow.dev.rococo.dto.artist.ArtistResponse;
 import mipkasnow.dev.rococo.dto.artist.ArtistUpdateRequest;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ArtistService {
 
     private final ArtistRepository artistRepository;
@@ -34,6 +36,9 @@ public class ArtistService {
 
         FileEntity photo = s3FileService.save(MinioBucket.artist, null, createRequest.photo());
         ArtistEntity createdArtist = artistRepository.save(new ArtistEntity(createRequest, photo));
+
+        log.info("Created artist {}", createdArtist);
+
         return toResponse(createdArtist);
     }
 
@@ -48,6 +53,9 @@ public class ArtistService {
         FileEntity photo = s3FileService.save(MinioBucket.artist, foundArtist.getPhotoFile(), updateRequest.photo());
         foundArtist.update(updateRequest, photo);
         ArtistEntity updatedArtist = artistRepository.save(foundArtist);
+
+        log.info("Updated artist {}", updatedArtist);
+
         return toResponse(updatedArtist);
     }
 

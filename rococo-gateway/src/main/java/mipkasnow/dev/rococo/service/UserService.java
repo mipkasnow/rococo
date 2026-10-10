@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import mipkasnow.dev.rococo.config.context.UserContext;
 import mipkasnow.dev.rococo.dto.user.UserResponse;
 import mipkasnow.dev.rococo.dto.user.UserUpdateRequest;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -44,6 +46,9 @@ public class UserService {
         if (avatar == null && previousAvatar != null) {
             s3FileService.delete(previousAvatar);
         }
+
+        log.info("User {} has been updated", username);
+
         return toResponse(saved);
     }
 
