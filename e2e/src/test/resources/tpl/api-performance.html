@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rococo API</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #efeae2;
+            --ink: #1b1916;
+            --muted: #6f685f;
+            --paper: #fffdf9;
+            --line: #e3dacd;
+            --teal: #0e6b66;
+            --amber: #9a5b12;
+            --red: #a32622;
+            --green: #1d7a45;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.45 ui-sans-serif, system-ui, sans-serif;
+        }
+
+        header {
+            background: var(--ink);
+            color: #f6f1e8;
+        }
+
+        .wrap {
+            width: min(1240px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-end;
+            padding: 28px 0 24px;
+        }
+
+        .eyebrow {
+            margin: 0 0 4px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #c8bfb2;
+        }
+
+        h1, h2 { font-weight: 650; letter-spacing: -0.02em; }
+        h1 { margin: 0; font-size: 32px; }
+        h2 { margin: 0 0 12px; font-size: 16px; }
+
+        #meta {
+            margin: 0;
+            text-align: right;
+            color: #d9d0c4;
+            font-variant-numeric: tabular-nums;
+        }
+
+        main { padding: 22px 0 40px; }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .card, .panel, .chart, .dist {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 0 1px 0 rgba(27, 25, 22, 0.04);
+        }
+
+        .card { padding: 12px 14px 10px; }
+        .card .label, .hint, .legend, .shown, footer { color: var(--muted); }
+        .card .label { margin: 0; font-size: 12px; }
+        .card .value {
+            margin: 4px 0 0;
+            font-size: 22px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.03em;
+        }
+        .card .hint { margin: 2px 0 0; font-size: 12px; }
+        .card.bad .value { color: var(--red); }
+        .card.warn .value { color: var(--amber); }
+
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .chart, .dist, .panel { padding: 14px 16px 16px; }
+        .dist, .panel { margin-top: 12px; }
+
+        canvas {
+            width: 100%;
+            height: 240px;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .legend { display: flex; gap: 14px; margin: 8px 0 0; font-size: 12px; }
+        .swatch {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            margin-right: 6px;
+        }
+        .swatch.rps, .seg.b0 { background: var(--teal); }
+        .swatch.median { background: var(--ink); }
+        .swatch.p95, .seg.b3 { background: #c2410c; }
+        .seg.b1 { background: #c4a15a; }
+        .seg.b2 { background: #d97706; }
+
+        .bar {
+            display: flex;
+            height: 14px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #efe8dc;
+        }
+        .seg { min-width: 0; }
+        .dist-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 18px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .dist-item { display: inline-flex; align-items: center; }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        input, select, button {
+            font: inherit;
+            color: inherit;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            height: 34px;
+            padding: 0 12px;
+        }
+
+        #query { width: min(320px, 100%); border-radius: 10px; }
+        #query.exact { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14, 107, 102, 0.12); }
+        button { cursor: pointer; background: transparent; }
+        button:hover, .chip:hover { border-color: #c9bfb0; }
+
+        .methods { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+        .tabs { display: flex; gap: 6px; margin: 14px 0 10px; }
+        .tabs button[aria-selected="true"] { background: var(--teal); color: #fff; border-color: var(--teal); }
+        .shown { margin: 0 0 10px; font-size: 13px; }
+
+        .table-wrap {
+            max-height: 640px;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+        th {
+            position: sticky;
+            top: 0;
+            background: #f7f3ec;
+            font-size: 12px;
+            font-weight: 650;
+            color: var(--muted);
+        }
+        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+        tr.clickable { cursor: pointer; }
+        tr.clickable:hover, tbody tr:hover { background: #f7f3ec; }
+        .mono { font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; }
+        .clip { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .empty { text-align: center; color: var(--muted); padding: 28px 10px; }
+
+        .badge {
+            display: inline-block;
+            min-width: 52px;
+            text-align: center;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .m-GET { color: var(--teal); background: #e5f3f1; }
+        .m-POST { color: var(--green); background: #e5f6ec; }
+        .m-PATCH, .m-PUT { color: #1d4e89; background: #e7f0fa; }
+        .m-PATCH { color: var(--amber); background: #fbf1e4; }
+        .m-DELETE, .st-bad { color: var(--red); background: #fdeceb; }
+        .st-ok { color: var(--green); background: #e5f6ec; }
+        .st-err { color: var(--muted); background: #f0ebe3; }
+        .t-fast { color: var(--green); }
+        .t-warn { color: var(--amber); font-weight: 650; }
+        .t-slow { color: var(--red); font-weight: 700; }
+
+        #tip {
+            position: fixed;
+            z-index: 5;
+            pointer-events: none;
+            background: var(--ink);
+            color: #f6f1e8;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.45;
+            white-space: pre;
+        }
+
+        footer { padding: 0 0 28px; font-size: 12px; }
+
+        @media (max-width: 1100px) {
+            .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (max-width: 800px) {
+            .top { flex-direction: column; align-items: flex-start; }
+            #meta { text-align: left; }
+            .charts, .cards { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="wrap top">
+        <div>
+            <p class="eyebrow">Rococo</p>
+            <h1>Отчёт по вызовам API</h1>
+        </div>
+        <p id="meta"></p>
+    </div>
+</header>
+<main class="wrap">
+    <section id="cards" class="cards"></section>
+    <section class="charts">
+        <article class="chart">
+            <h2>Запросы в секунду</h2>
+            <canvas id="rps"></canvas>
+            <p class="legend"><span><i class="swatch rps"></i>RPS по корзинам времени</span></p>
+        </article>
+        <article class="chart">
+            <h2>Время ответа</h2>
+            <canvas id="latency"></canvas>
+            <p class="legend"><span><i class="swatch median"></i>медиана</span><span><i class="swatch p95"></i>p95</span></p>
+        </article>
+    </section>
+    <section class="dist">
+        <h2>Распределение времени ответа</h2>
+        <div id="dist"></div>
+    </section>
+    <section class="panel">
+        <div class="toolbar">
+            <input id="query" type="search" placeholder="Поиск по ручке, URL или тесту" autocomplete="off">
+            <div id="methods" class="methods"></div>
+            <select id="status">
+                <option value="all">Все статусы</option>
+                <option value="2xx">2xx</option>
+                <option value="3xx">3xx</option>
+                <option value="4xx">4xx</option>
+                <option value="5xx">5xx</option>
+                <option value="error">Ошибки</option>
+            </select>
+            <label>от <input id="min-ms" type="number" min="0" step="1" style="width: 88px"> мс</label>
+            <select id="call-sort" hidden>
+                <option value="ms-desc">Медленные сверху</option>
+                <option value="ms-asc">Быстрые сверху</option>
+                <option value="at-asc">По ходу прогона</option>
+                <option value="at-desc">С конца прогона</option>
+                <option value="endpoint-asc">По ручке</option>
+                <option value="status-desc">По статусу</option>
+            </select>
+            <select id="group-sort">
+                <option value="avg-asc">Среднее по возрастанию</option>
+                <option value="avg-desc">Среднее по убыванию</option>
+                <option value="median-asc">Медиана по возрастанию</option>
+                <option value="median-desc">Медиана по убыванию</option>
+                <option value="p95-asc">p95 по возрастанию</option>
+                <option value="p95-desc">p95 по убыванию</option>
+                <option value="max-asc">Максимум по возрастанию</option>
+                <option value="max-desc">Максимум по убыванию</option>
+                <option value="count-desc">Больше вызовов</option>
+                <option value="count-asc">Меньше вызовов</option>
+            </select>
+            <button id="reset" type="button">Сбросить</button>
+        </div>
+        <div class="tabs">
+            <button id="tab-groups" type="button" aria-selected="true">Ручки</button>
+            <button id="tab-calls" type="button" aria-selected="false">Запросы</button>
+        </div>
+        <p id="shown" class="shown"></p>
+        <div id="view"></div>
+    </section>
+</main>
+<footer class="wrap">В отчёт попадают вызовы Retrofit.</footer>
+<div id="tip" hidden></div>
+<script id="api-timing-data" type="application/json">__API_TIMING_DATA__</script>
+<script>
+    (() => {
+        const report = JSON.parse(document.getElementById("api-timing-data").textContent);
+        report.calls = Array.isArray(report.calls) ? report.calls : [];
+
+        const cards = document.getElementById("cards");
+        const dist = document.getElementById("dist");
+        const view = document.getElementById("view");
+        const shown = document.getElementById("shown");
+        const queryInput = document.getElementById("query");
+        const methodsBox = document.getElementById("methods");
+        const statusInput = document.getElementById("status");
+        const minMsInput = document.getElementById("min-ms");
+        const callSort = document.getElementById("call-sort");
+        const groupSort = document.getElementById("group-sort");
+        const tabGroups = document.getElementById("tab-groups");
+        const tabCalls = document.getElementById("tab-calls");
+        const rpsCanvas = document.getElementById("rps");
+        const latencyCanvas = document.getElementById("latency");
+        const tip = document.getElementById("tip");
+        const intFormat = new Intl.NumberFormat("ru-RU");
+        const decFormat = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+        const state = {
+            query: "",
+            exact: false,
+            methods: new Set(),
+            status: "all",
+            minMs: 0,
+            callSort: "ms-desc",
+            groupSort: "avg-asc",
+            tab: "groups"
+        };
+        let current = [];
+
+        document.getElementById("meta").textContent =
+            report.startedLocal + " — " + report.finishedLocal + " · " + report.zone;
+
+        const knownMethods = [...new Set(report.calls.map(call => call.method))].sort();
+        for (const method of knownMethods) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "chip";
+            button.textContent = method;
+            button.addEventListener("click", () => {
+                if (state.methods.has(method)) state.methods.delete(method);
+                else state.methods.add(method);
+                render();
+            });
+            methodsBox.append(button);
+        }
+
+        queryInput.addEventListener("input", () => {
+            state.query = queryInput.value.trim();
+            state.exact = false;
+            render();
+        });
+        statusInput.addEventListener("change", () => {
+            state.status = statusInput.value;
+            render();
+        });
+        minMsInput.addEventListener("input", () => {
+            const value = Number(minMsInput.value);
+            state.minMs = Number.isFinite(value) && value > 0 ? value : 0;
+            render();
+        });
+        callSort.addEventListener("change", () => {
+            state.callSort = callSort.value;
+            render();
+        });
+        groupSort.addEventListener("change", () => {
+            state.groupSort = groupSort.value;
+            render();
+        });
+        tabGroups.addEventListener("click", () => {
+            state.tab = "groups";
+            render();
+        });
+        tabCalls.addEventListener("click", () => {
+            state.tab = "calls";
+            render();
+        });
+        document.getElementById("reset").addEventListener("click", () => {
+            state.query = "";
+            state.exact = false;
+            state.methods.clear();
+            state.status = "all";
+            state.minMs = 0;
+            state.callSort = "ms-desc";
+            state.groupSort = "avg-asc";
+            state.tab = "groups";
+            queryInput.value = "";
+            statusInput.value = "all";
+            minMsInput.value = "";
+            callSort.value = "ms-desc";
+            groupSort.value = "avg-asc";
+            render();
+        });
+        view.addEventListener("click", event => {
+            const row = event.target.closest("tr[data-endpoint]");
+            if (!row) return;
+            state.query = row.dataset.endpoint;
+            state.exact = true;
+            state.tab = "calls";
+            queryInput.value = state.query;
+            render();
+        });
+
+        function bindHover(canvas) {
+            canvas.addEventListener("mousemove", event => showTip(canvas, event));
+            canvas.addEventListener("mouseleave", () => {
+                tip.hidden = true;
+            });
+        }
+        bindHover(rpsCanvas);
+        bindHover(latencyCanvas);
+        new ResizeObserver(() => drawCharts(current)).observe(document.querySelector(".charts"));
+
+        function render() {
+            const calls = filteredCalls();
+            current = sortCalls(calls);
+            const groups = sortGroups(groupsOf(calls));
+            renderCards(calls, groups);
+            renderDist(calls);
+            drawCharts(current);
+            tabGroups.textContent = "Ручки · " + intFormat.format(groups.length);
+            tabCalls.textContent = "Запросы · " + intFormat.format(calls.length);
+            tabGroups.setAttribute("aria-selected", String(state.tab === "groups"));
+            tabCalls.setAttribute("aria-selected", String(state.tab === "calls"));
+            callSort.hidden = state.tab !== "calls";
+            groupSort.hidden = state.tab !== "groups";
+            queryInput.classList.toggle("exact", state.exact);
+            for (const button of methodsBox.children) {
+                button.classList.toggle("on", state.methods.has(button.textContent));
+            }
+            const hint = state.tab === "groups"
+                ? "Клик по ручке открывает её запросы."
+                : "Показаны отдельные вызовы.";
+            const scope = calls.length === report.calls.length
+                ? intFormat.format(calls.length)
+                : intFormat.format(calls.length) + " из " + intFormat.format(report.calls.length);
+            shown.textContent = scope + " · " + hint;
+            view.replaceChildren(state.tab === "groups" ? groupTable(groups) : callTable(current));
+        }
+
+        function filteredCalls() {
+            const query = state.query.toLowerCase();
+            return report.calls.filter(call => {
+                if (state.methods.size > 0 && !state.methods.has(call.method)) return false;
+                if (!statusMatches(call.status)) return false;
+                if (call.ms < state.minMs) return false;
+                if (!query) return true;
+                if (state.exact) return call.endpoint === state.query;
+                return (call.endpoint + " " + call.url + " " + call.test).toLowerCase().includes(query);
+            });
+        }
+
+        function statusMatches(status) {
+            switch (state.status) {
+                case "2xx": return status >= 200 && status < 300;
+                case "3xx": return status >= 300 && status < 400;
+                case "4xx": return status >= 400 && status < 500;
+                case "5xx": return status >= 500 && status < 600;
+                case "error": return status === 0 || status >= 400;
+                default: return true;
+            }
+        }
+
+        function renderCards(calls, groups) {
+            const durationMs = Math.max(0, report.finishedAt - report.startedAt);
+            const seconds = Math.max(1, durationMs / 1000);
+            const sorted = calls.map(call => call.ms).sort((a, b) => a - b);
+            const errors = calls.filter(call => call.status === 0 || call.status >= 400).length;
+            const avg = sorted.length ? sorted.reduce((sum, value) => sum + value, 0) / sorted.length : 0;
+            const p95 = percentile(sorted, 0.95);
+            cards.replaceChildren(
+                stat("Запросы", intFormat.format(calls.length), calls.length === report.calls.length ? "за прогон" : "из " + intFormat.format(report.calls.length)),
+                stat("Ручки", intFormat.format(groups.length), "в текущем срезе"),
+                stat("Время", formatDuration(durationMs), "весь прогон"),
+                stat("RPS", decFormat.format(calls.length / seconds), "на длительность прогона"),
+                stat("Среднее", formatMs(avg, true), ""),
+                stat("Медиана", formatMs(percentile(sorted, 0.5), false), ""),
+                stat("p95", formatMs(p95, false), "", p95 >= 1000 ? "warn" : ""),
+                stat("Ошибки", intFormat.format(errors), calls.length ? formatPct(errors / calls.length) : "0%", errors ? "bad" : "")
+            );
+        }
+
+        function stat(label, value, hint, tone) {
+            const card = el("article", "card" + (tone ? " " + tone : ""));
+            card.append(el("p", "label", label), el("p", "value", value));
+            if (hint) card.append(el("p", "hint", hint));
+            return card;
+        }
+
+        function renderDist(calls) {
+            const bins = [
+                { label: "до 200 мс", count: 0, className: "b0" },
+                { label: "200–499 мс", count: 0, className: "b1" },
+                { label: "500–999 мс", count: 0, className: "b2" },
+                { label: "от 1000 мс", count: 0, className: "b3" }
+            ];
+            for (const call of calls) {
+                if (call.ms < 200) bins[0].count += 1;
+                else if (call.ms < 500) bins[1].count += 1;
+                else if (call.ms < 1000) bins[2].count += 1;
+                else bins[3].count += 1;
+            }
+            const bar = el("div", "bar");
+            const legend = el("div", "dist-legend");
+            if (!calls.length) bar.append(el("div", "seg"));
+            for (const bin of bins) {
+                const segment = el("div", "seg " + bin.className);
+                segment.style.flexGrow = String(bin.count);
+                bar.append(segment);
+                const item = el("span", "dist-item");
+                item.append(
+                    el("i", "swatch " + bin.className),
+                    document.createTextNode(bin.label + ": " + intFormat.format(bin.count) + " · " + formatPct(calls.length ? bin.count / calls.length : 0))
+                );
+                legend.append(item);
+            }
+            dist.replaceChildren(bar, legend);
+        }
+
+        function groupTable(groups) {
+            return table(
+                [
+                    { text: "Ручка" },
+                    { text: "Вызовы", className: "num" },
+                    { text: "min", className: "num" },
+                    { text: "avg", className: "num" },
+                    { text: "медиана", className: "num" },
+                    { text: "p95", className: "num" },
+                    { text: "max", className: "num" },
+                    { text: "ошибки", className: "num" }
+                ],
+                groups.map(group => ({
+                    endpoint: group.endpoint,
+                    cells: [
+                        routeCell(group.endpoint),
+                        { text: intFormat.format(group.count), className: "num" },
+                        { text: formatMs(group.min, false), className: "num" },
+                        { text: formatMs(group.avg, true), className: "num " + tone(group.avg) },
+                        { text: formatMs(group.median, false), className: "num" },
+                        { text: formatMs(group.p95, false), className: "num " + tone(group.p95) },
+                        { text: formatMs(group.max, false), className: "num " + tone(group.max) },
+                        { text: intFormat.format(group.errors), className: "num" + (group.errors ? " t-slow" : "") }
+                    ]
+                }))
+            );
+        }
+
+        function callTable(calls) {
+            return table(
+                [
+                    { text: "Время" },
+                    { text: "Метод" },
+                    { text: "Ручка" },
+                    { text: "Статус" },
+                    { text: "Ответ", className: "num" },
+                    { text: "Тест" },
+                    { text: "URL" }
+                ],
+                calls.map(call => ({
+                    cells: [
+                        { text: formatClock(call.at, true), className: "mono" },
+                        badgeCell(call.method),
+                        { text: splitEndpoint(call.endpoint).path, className: "mono" },
+                        statusCell(call.status),
+                        { text: formatMs(call.ms, false), className: "num " + tone(call.ms) },
+                        { text: call.test || "—", className: "clip", title: call.test },
+                        { text: shortUrl(call.url), className: "mono clip", title: call.url }
+                    ]
+                }))
+            );
+        }
+
+        function table(headers, rows) {
+            const wrap = el("div", "table-wrap");
+            const node = document.createElement("table");
+            const head = document.createElement("thead");
+            const headRow = document.createElement("tr");
+            for (const header of headers) headRow.append(el("th", header.className || "", header.text));
+            head.append(headRow);
+            const body = document.createElement("tbody");
+            if (!rows.length) {
+                const row = document.createElement("tr");
+                const cell = el("td", "empty", "Ничего не найдено");
+                cell.colSpan = headers.length;
+                row.append(cell);
+                body.append(row);
+            }
+            for (const item of rows) {
+                const row = document.createElement("tr");
+                if (item.endpoint) {
+                    row.className = "clickable";
+                    row.dataset.endpoint = item.endpoint;
+                }
+                for (const cell of item.cells) {
+                    if (cell.node) {
+                        const td = document.createElement("td");
+                        td.append(cell.node);
+                        row.append(td);
+                        continue;
+                    }
+                    const td = el("td", cell.className || "", cell.text);
+                    if (cell.title) td.title = cell.title;
+                    row.append(td);
+                }
+                body.append(row);
+            }
+            node.append(head, body);
+            wrap.append(node);
+            return wrap;
+        }
+
+        function routeCell(endpoint) {
+            const parts = splitEndpoint(endpoint);
+            const box = document.createElement("span");
+            box.append(badge(parts.method), document.createTextNode(" "), el("span", "mono", parts.path));
+            return { node: box };
+        }
+
+        function badgeCell(method) {
+            return { node: badge(method) };
+        }
+
+        function badge(method) {
+            return el("span", "badge m-" + method, method);
+        }
+
+        function statusCell(status) {
+            const text = status === 0 ? "ERR" : String(status);
+            const toneName = status === 0 ? "st-err" : status >= 400 ? "st-bad" : "st-ok";
+            return { node: el("span", "badge " + toneName, text) };
+        }
+
+        function groupsOf(calls) {
+            const map = new Map();
+            for (const call of calls) {
+                let group = map.get(call.endpoint);
+                if (!group) {
+                    group = { endpoint: call.endpoint, samples: [], errors: 0 };
+                    map.set(call.endpoint, group);
+                }
+                group.samples.push(call.ms);
+                if (call.status === 0 || call.status >= 400) group.errors += 1;
+            }
+            return [...map.values()].map(group => {
+                const sorted = group.samples.slice().sort((a, b) => a - b);
+                const sum = sorted.reduce((total, value) => total + value, 0);
+                return {
+                    endpoint: group.endpoint,
+                    count: sorted.length,
+                    errors: group.errors,
+                    min: sorted[0],
+                    max: sorted[sorted.length - 1],
+                    avg: sum / sorted.length,
+                    median: percentile(sorted, 0.5),
+                    p95: percentile(sorted, 0.95)
+                };
+            });
+        }
+
+        function sortGroups(groups) {
+            const direction = state.groupSort.endsWith("-asc") ? 1 : -1;
+            const field = state.groupSort.replace(/-(asc|desc)$/, "");
+            return groups.slice().sort((a, b) => (a[field] - b[field]) * direction || a.endpoint.localeCompare(b.endpoint));
+        }
+
+        function sortCalls(calls) {
+            const copy = calls.slice();
+            switch (state.callSort) {
+                case "ms-asc":
+                    return copy.sort((a, b) => a.ms - b.ms || a.at - b.at);
+                case "at-asc":
+                    return copy.sort((a, b) => a.at - b.at);
+                case "at-desc":
+                    return copy.sort((a, b) => b.at - a.at);
+                case "status-desc":
+                    return copy.sort((a, b) => b.status - a.status || b.ms - a.ms);
+                case "endpoint-asc":
+                    return copy.sort((a, b) => a.endpoint.localeCompare(b.endpoint) || a.at - b.at);
+                default:
+                    return copy.sort((a, b) => b.ms - a.ms || a.at - b.at);
+            }
+        }
+
+        function buildBuckets(calls) {
+            const start = report.startedAt;
+            const end = Math.max(report.finishedAt, start + 1000);
+            const span = end - start;
+            const size = Math.max(1000, Math.ceil(span / 40 / 1000) * 1000);
+            const count = Math.max(1, Math.ceil(span / size));
+            const buckets = Array.from({ length: count }, (_, index) => ({
+                start: start + index * size,
+                calls: []
+            }));
+            for (const call of calls) {
+                let index = Math.floor((call.at - start) / size);
+                if (index < 0) index = 0;
+                if (index >= count) index = count - 1;
+                buckets[index].calls.push(call);
+            }
+            return buckets.map(bucket => {
+                const sorted = bucket.calls.map(call => call.ms).sort((a, b) => a - b);
+                return {
+                    start: bucket.start,
+                    rps: bucket.calls.length / (size / 1000),
+                    count: bucket.calls.length,
+                    median: sorted.length ? percentile(sorted, 0.5) : null,
+                    p95: sorted.length ? percentile(sorted, 0.95) : null
+                };
+            });
+        }
+
+        function drawCharts(calls) {
+            const buckets = buildBuckets(calls);
+            drawRps(buckets);
+            drawLatency(buckets);
+        }
+
+        function drawRps(buckets) {
+            const frame = canvasFrame(rpsCanvas);
+            if (!frame) return;
+            const plot = plotBox(frame);
+            const max = Math.max(1, ...buckets.map(bucket => bucket.rps));
+            grid(frame, plot, max, value => decFormat.format(value));
+            const slot = plot.w / buckets.length;
+            const hits = [];
+            buckets.forEach((bucket, index) => {
+                const barWidth = Math.min(28, Math.max(2, slot - 3));
+                const x = plot.x + index * slot + (slot - barWidth) / 2;
+                const y = yOf(bucket.rps, max, plot);
+                frame.ctx.fillStyle = "#0e6b66";
+                frame.ctx.fillRect(x, y, barWidth, plot.y + plot.h - y);
+                hits.push({
+                    x: plot.x + index * slot,
+                    w: slot,
+                    text: formatClock(bucket.start, false) + "\n" + decFormat.format(bucket.rps) + " req/s\n" + intFormat.format(bucket.count) + " запросов"
+                });
+            });
+            axisLabels(frame, plot, buckets);
+            rpsCanvas.hits = hits;
+        }
+
+        function drawLatency(buckets) {
+            const frame = canvasFrame(latencyCanvas);
+            if (!frame) return;
+            const plot = plotBox(frame);
+            const max = Math.max(1, ...buckets.flatMap(bucket => [bucket.median || 0, bucket.p95 || 0]));
+            grid(frame, plot, max, value => intFormat.format(Math.round(value)));
+            strokeSeries(frame, plot, buckets, max, "median", "#1b1916");
+            strokeSeries(frame, plot, buckets, max, "p95", "#c2410c");
+            const slot = plot.w / buckets.length;
+            latencyCanvas.hits = buckets.map((bucket, index) => ({
+                x: plot.x + index * slot,
+                w: slot,
+                text: formatClock(bucket.start, false)
+                    + "\nмедиана " + (bucket.median == null ? "—" : formatMs(bucket.median, false))
+                    + "\np95 " + (bucket.p95 == null ? "—" : formatMs(bucket.p95, false))
+                    + "\n" + intFormat.format(bucket.count) + " запросов"
+            }));
+            axisLabels(frame, plot, buckets);
+        }
+
+        function strokeSeries(frame, plot, buckets, max, field, color) {
+            frame.ctx.beginPath();
+            frame.ctx.strokeStyle = color;
+            frame.ctx.lineWidth = 2;
+            let open = false;
+            buckets.forEach((bucket, index) => {
+                const value = bucket[field];
+                if (value == null) {
+                    open = false;
+                    return;
+                }
+                const x = plot.x + (index + 0.5) * (plot.w / buckets.length);
+                const y = yOf(value, max, plot);
+                if (!open) frame.ctx.moveTo(x, y);
+                else frame.ctx.lineTo(x, y);
+                open = true;
+            });
+            frame.ctx.stroke();
+        }
+
+        function canvasFrame(canvas) {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            if (width < 20 || height < 20) return null;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            const ctx = canvas.getContext("2d");
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+            return { ctx, width, height };
+        }
+
+        function plotBox(frame) {
+            return { x: 48, y: 12, w: frame.width - 64, h: frame.height - 40 };
+        }
+
+        function grid(frame, plot, max, format) {
+            frame.ctx.font = "11px ui-sans-serif, system-ui, sans-serif";
+            frame.ctx.fillStyle = "#6f685f";
+            frame.ctx.strokeStyle = "#e3dacd";
+            frame.ctx.lineWidth = 1;
+            for (let tick = 0; tick < 4; tick += 1) {
+                const value = max * (1 - tick / 3);
+                const y = yOf(value, max, plot);
+                frame.ctx.beginPath();
+                frame.ctx.moveTo(plot.x, y);
+                frame.ctx.lineTo(plot.x + plot.w, y);
+                frame.ctx.stroke();
+                frame.ctx.fillText(format(value), 4, y + 4);
+            }
+        }
+
+        function axisLabels(frame, plot, buckets) {
+            frame.ctx.fillStyle = "#6f685f";
+            frame.ctx.font = "11px ui-sans-serif, system-ui, sans-serif";
+            const labels = [buckets[0], buckets[Math.floor((buckets.length - 1) / 2)], buckets[buckets.length - 1]];
+            const xs = [plot.x, plot.x + plot.w / 2, plot.x + plot.w - 52];
+            labels.forEach((bucket, index) => {
+                if (!bucket) return;
+                frame.ctx.fillText(formatClock(bucket.start, false), xs[index], plot.y + plot.h + 18);
+            });
+        }
+
+        function yOf(value, max, plot) {
+            return plot.y + plot.h - (value / max) * plot.h;
+        }
+
+        function showTip(canvas, event) {
+            const hits = canvas.hits || [];
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const hit = hits.find(item => x >= item.x && x <= item.x + item.w);
+            if (!hit) {
+                tip.hidden = true;
+                return;
+            }
+            tip.hidden = false;
+            tip.textContent = hit.text;
+            const left = Math.min(event.clientX + 14, window.innerWidth - tip.offsetWidth - 12);
+            tip.style.left = left + "px";
+            tip.style.top = (event.clientY + 14) + "px";
+        }
+
+        function percentile(sorted, p) {
+            if (!sorted.length) return 0;
+            const index = (sorted.length - 1) * p;
+            const lower = Math.floor(index);
+            const upper = Math.ceil(index);
+            if (lower === upper) return sorted[lower];
+            return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+        }
+
+        function splitEndpoint(endpoint) {
+            const space = endpoint.indexOf(" ");
+            if (space < 0) return { method: endpoint, path: "" };
+            return { method: endpoint.slice(0, space), path: endpoint.slice(space + 1) };
+        }
+
+        function shortUrl(url) {
+            try {
+                const parsed = new URL(url);
+                return parsed.pathname + parsed.search;
+            } catch (error) {
+                return url;
+            }
+        }
+
+        function tone(ms) {
+            if (ms >= 1000) return "t-slow";
+            if (ms >= 500) return "t-warn";
+            if (ms < 200) return "t-fast";
+            return "";
+        }
+
+        function formatMs(value, decimal) {
+            const number = decimal ? decFormat.format(value) : intFormat.format(Math.round(value));
+            return number + " мс";
+        }
+
+        function formatPct(value) {
+            return decFormat.format(value * 100) + "%";
+        }
+
+        function formatDuration(ms) {
+            const seconds = Math.max(0, Math.round(ms / 1000));
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const rest = seconds % 60;
+            if (hours) return hours + " ч " + minutes + " мин " + rest + " с";
+            if (minutes) return minutes + " мин " + rest + " с";
+            return rest + " с";
+        }
+
+        function formatClock(ms, withMillis) {
+            const date = new Date(ms);
+            const pad = (value, size = 2) => String(value).padStart(size, "0");
+            const clock = pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds());
+            return withMillis ? clock + "." + pad(date.getMilliseconds(), 3) : clock;
+        }
+
+        function el(tag, className, text) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text != null) node.textContent = text;
+            return node;
+        }
+
+        render();
+    })();
+</script>
+</body>
+</html>

@@ -1,14 +1,13 @@
 package mipkasnow.dev.rococo.integration.support;
 
+import lombok.experimental.UtilityClass;
 import mipkasnow.dev.rococo.util.PhotoCodecUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public final class TestPhotos {
-
-    private TestPhotos() {
-    }
+@UtilityClass
+public class TestPhotos {
 
     public static String dataUrl(String classpathLocation) {
         try (InputStream input = TestPhotos.class.getClassLoader().getResourceAsStream(classpathLocation)) {

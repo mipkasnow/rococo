@@ -1,0 +1,41 @@
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="HTTP" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="mipkasnow.dev.rococo.api.logging" level="INFO" additivity="false">
+        <appender-ref ref="HTTP"/>
+    </logger>
+
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.apache.hc" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="software.amazon.awssdk" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="com.atomikos" level="WARN"/>
+    <logger name="p6spy" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="reactor.netty" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
+    <logger name="okhttp3" level="WARN"/>
+    <logger name="io.qameta.allure" level="OFF"/>
+    <logger name="com.codeborne.selenide" level="WARN"/>
+    <logger name="org.openqa.selenium" level="ERROR"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

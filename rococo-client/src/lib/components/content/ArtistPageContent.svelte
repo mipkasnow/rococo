@@ -51,7 +51,9 @@
                 return {
                     data: artistData.data,
                     paintings: paintingsData.data?.content,
-                    noMoreData: paintingsData.data ? currentPage === paintingsData.data.page.totalPages - 1 : true,
+                    noMoreData: paintingsData.data.page.totalPages
+                        ? currentPage === paintingsData.data.page.totalPages - 1
+                        : true,
                     isLoading: false,
                     ignoreIds: [],
                 }
@@ -88,7 +90,9 @@
                         ...prevState.paintings,
                         ...newBatch
                     ],
-                    noMoreData: currentPage === resData.page.totalPages - 1,
+                    noMoreData: resData.page.totalPages
+                        ? currentPage === resData.page.totalPages - 1
+                        : true,
                     isLoading: false,
                 }
             });

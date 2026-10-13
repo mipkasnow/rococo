@@ -1,0 +1,128 @@
+package mipkasnow.dev.rococo.api;
+
+import io.qameta.allure.okhttp3.AllureOkHttp3;
+import mipkasnow.dev.rococo.api.core.ThreadSafeCookieStore;
+import mipkasnow.dev.rococo.api.logging.PrettyHttpLoggingInterceptor;
+import mipkasnow.dev.rococo.api.timing.ApiTimingInterceptor;
+import mipkasnow.dev.rococo.config.Config;
+import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import retrofit2.Converter;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+
+@ParametersAreNonnullByDefault
+public abstract class RestClient {
+
+    protected static final Config CFG = Config.getInstance();
+
+    private final OkHttpClient client;
+    private final Retrofit retrofit;
+
+    public RestClient(String baseUrl) {
+        this(baseUrl, false, JacksonConverterFactory.create());
+    }
+
+    public RestClient(String baseUrl, boolean followRedirect) {
+        this(baseUrl, followRedirect, JacksonConverterFactory.create());
+    }
+
+    public RestClient(String baseUrl, boolean followRedirect, boolean httpLogging) {
+        this(baseUrl, followRedirect, JacksonConverterFactory.create(), httpLogging);
+    }
+
+    public RestClient(String baseUrl, boolean followRedirect, Converter.Factory converterFactory) {
+        this(baseUrl, followRedirect, converterFactory, true);
+    }
+
+    public RestClient(String baseUrl, Converter.Factory converterFactory) {
+        this(baseUrl, false, converterFactory);
+    }
+
+    public RestClient(
+            String baseUrl,
+            boolean followRedirect,
+            Converter.Factory converterFactory,
+            @Nullable Interceptor... interceptors
+    ) {
+        this(baseUrl, followRedirect, converterFactory, true, interceptors);
+    }
+
+    public RestClient(
+            String baseUrl,
+            boolean followRedirect,
+            Converter.Factory converterFactory,
+            boolean httpLogging,
+            @Nullable Interceptor... interceptors
+    ) {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .followRedirects(followRedirect);
+
+        clientBuilder.addInterceptor(new ApiTimingInterceptor());
+
+        if (interceptors != null) {
+            for (Interceptor interceptor : interceptors) {
+                clientBuilder.addNetworkInterceptor(interceptor);
+            }
+        }
+
+        clientBuilder.addNetworkInterceptor(new AllureOkHttp3()
+                .setRequestTemplate("request.ftl")
+                .setResponseTemplate("response.ftl"));
+        if (httpLogging) {
+            clientBuilder.addNetworkInterceptor(new PrettyHttpLoggingInterceptor());
+        }
+        clientBuilder.cookieJar(
+                new JavaNetCookieJar(
+                        new CookieManager(
+                                ThreadSafeCookieStore.INSTANCE,
+                                CookiePolicy.ACCEPT_ALL
+                        )
+                )
+        );
+
+        this.client = clientBuilder.build();
+        this.retrofit = new Retrofit.Builder()
+                .client(this.client)
+                .baseUrl(baseUrl)
+                .addConverterFactory(converterFactory)
+                .build();
+    }
+
+    @Nonnull
+    public <T> T create(final Class<T> service) {
+        return this.retrofit.create(service);
+    }
+
+    @ParametersAreNonnullByDefault
+    public static final class EmtyRestClient extends RestClient {
+
+        public EmtyRestClient(String baseUrl) {
+            super(baseUrl);
+        }
+
+        public EmtyRestClient(String baseUrl, boolean followRedirect) {
+            super(baseUrl, followRedirect);
+        }
+
+        public EmtyRestClient(String baseUrl, Converter.Factory factory) {
+            super(baseUrl, factory);
+        }
+
+        public EmtyRestClient(
+                String baseUrl,
+                boolean followRedirect,
+                Converter.Factory factory,
+                @Nullable Interceptor... interceptors
+        ) {
+            super(baseUrl, followRedirect, factory, interceptors);
+        }
+    }
+}
