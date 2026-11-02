@@ -10,9 +10,20 @@
 | `rococo-client` | 3000 | Frontend |
 | Postgres | 5433 | `rococo_auth`, `rococo_gateway` |
 | Kafka | 9092 | UI на 8085 |
-| MinIO | 9100 / 9101 | buckets: painting, museum, artist, avatar |
+| MinIO (silo) | 9100 / 9101 | buckets: painting, museum, artist, avatar |
 
 Swagger (только gateway): http://localhost:8080/swagger-ui/index.html
+
+### Доступы к infra
+
+| Что | URL / хост | Логин | Пароль |
+| --- | --- | --- | --- |
+| PostgreSQL | `localhost:5433` | `postgres` | `secret` |
+| Kafka UI | http://localhost:8085 | без логина | — |
+| MinIO Console (silo) | http://localhost:9101 | `user` | `password` |
+| MinIO API | http://localhost:9100 | `user` | `password` |
+
+Базы Postgres: `rococo_auth`, `rococo_gateway`.
 
 <p align="center">
   <img src="e2e/src/test/resources/samples/rococo.png" alt="Rococo UI" width="90%" />
