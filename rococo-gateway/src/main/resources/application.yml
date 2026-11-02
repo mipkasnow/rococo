@@ -1,0 +1,82 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rococo-gateway
+  profiles:
+    active: local
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: 'http://localhost:9000'
+  datasource:
+    url: 'jdbc:postgresql://localhost:5433/rococo_gateway'
+    hikari:
+      connection-timeout: 20000
+      minimum-idle: 10
+      maximum-pool-size: 30
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+    username: postgres
+    password: secret
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration/rococo-gateway
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: false
+    generate-ddl: true
+    open-in-view: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    admin:
+      fail-fast: false
+    producer:
+      acks: 1
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        '[linger.ms]': 5
+    consumer:
+      group-id: rococo-gateway-logs
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        '[spring.json.trusted.packages]': mipkasnow.dev.rococo.log
+    listener:
+      missing-topics-fatal: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.springframework.security.oauth2: INFO
+
+rococo-front:
+  base-uri: 'http://localhost:3000'
+
+springdoc:
+  swagger-ui:
+    persist-authorization: true
+
+rococo:
+  s3:
+    endpoint: http://localhost:9100
+    region: us-east-1
+    access-key: user
+    secret-key: password

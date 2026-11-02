@@ -1,0 +1,4 @@
+rootProject.name = 'rococo'
+include 'rococo-gateway'
+include 'rococo-auth'
+include 'e2e'

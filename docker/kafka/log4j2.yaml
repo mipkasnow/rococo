@@ -1,0 +1,22 @@
+Configuration:
+  Properties:
+    Property:
+      - name: "kafka.logs.dir"
+        value: "."
+      - name: "logPattern"
+        value: "[%d] %p %m (%c)%n"
+  Appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        pattern: "${logPattern}"
+  Loggers:
+    Root:
+      level: WARN
+      AppenderRef:
+        - ref: STDOUT
+    Logger:
+      - name: kafka
+        level: WARN
+      - name: org.apache.kafka
+        level: WARN

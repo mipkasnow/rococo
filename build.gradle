@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+}
+
+subprojects {
+    ext {
+        lombokVersion = '1.18.42'
+        flywayVersion = '11.14.1'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.8"
+        }
+    }
+
+    configurations {
+        mockitoAgent
+    }
+
+    dependencies {
+        mockitoAgent('org.mockito:mockito-core') {
+            transitive = false
+        }
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+        jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+
+        testLogging {
+            events "PASSED", "FAILED", "SKIPPED"
+        }
+    }
+}

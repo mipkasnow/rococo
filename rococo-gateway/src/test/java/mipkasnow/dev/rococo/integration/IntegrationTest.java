@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.integration;
 
 import mipkasnow.dev.rococo.integration.support.IntegrationInfrastructure;
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Tag("integrationTests")
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"local", "test"})

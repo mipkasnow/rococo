@@ -1,0 +1,49 @@
+plugins {
+    id 'org.springframework.boot' version '3.5.8'
+}
+
+group = 'mipkasnow.dev'
+version = '1.0.0'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    implementation platform('software.amazon.awssdk:bom:2.55.12')
+    implementation 'software.amazon.awssdk:s3'
+    implementation "org.flywaydb:flyway-core:${project.ext.flywayVersion}"
+    implementation "org.flywaydb:flyway-database-postgresql:${project.ext.flywayVersion}"
+    annotationProcessor "org.projectlombok:lombok:${project.ext.lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${project.ext.lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${project.ext.lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${project.ext.lombokVersion}"
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:kafka'
+    testImplementation 'org.testcontainers:minio'
+}
+
+tasks.register('unitTests', Test) {
+    useJUnitPlatform {
+        includeTags 'unitTests'
+    }
+}
+
+tasks.register('integrationTests', Test) {
+    useJUnitPlatform {
+        includeTags 'integrationTests'
+    }
+}
+
+tasks.register('printVersion') {
+    doLast {
+        println project.version
+    }
+}
