@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.rest;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.MuseumApiClient;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.Museum;
@@ -24,6 +25,7 @@ import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @RestTest
+@Feature("Музеи")
 public class MuseumRestTest {
 
     private MuseumApiClient museumApiClient;
@@ -124,7 +126,7 @@ public class MuseumRestTest {
         RestAssert.error("занятое название", response, 409, ApiMsg.CODE_MUSEUM_TITLE_TAKEN, ApiMsg.MUSEUM_TITLE_TAKEN);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidCreates")
     @DisplayName("Создание музея отклоняет некорректные поля")
@@ -133,7 +135,7 @@ public class MuseumRestTest {
         RestAssert.error(caseName, response, 400, ApiMsg.CODE_BAD_REQUEST, message);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidUpdates")
     @DisplayName("Обновление музея отклоняет некорректные поля")

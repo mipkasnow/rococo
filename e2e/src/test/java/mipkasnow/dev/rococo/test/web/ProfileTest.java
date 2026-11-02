@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.web;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.meta.WebTest;
 import mipkasnow.dev.rococo.model.user.TestUser;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 
 @WebTest
+@Feature("Профиль")
 public class ProfileTest {
 
     private static final String FIRSTNAME = "Павел";

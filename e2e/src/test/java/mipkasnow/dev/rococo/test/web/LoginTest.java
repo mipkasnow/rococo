@@ -2,6 +2,7 @@ package mipkasnow.dev.rococo.test.web;
 
 import com.codeborne.selenide.Selenide;
 import mipkasnow.dev.rococo.api.client.AuthApiClient;
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.jupiter.annotation.meta.WebTest;
 import mipkasnow.dev.rococo.page.LoginPage;
 import mipkasnow.dev.rococo.page.MainPage;
@@ -13,6 +14,7 @@ import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomPassword;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomUsername;
 
 @WebTest
+@Feature("Авторизация")
 public class LoginTest {
 
     private AuthApiClient authApi;

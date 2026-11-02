@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.rest;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.ArtistApiClient;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.Artist;
@@ -22,6 +23,7 @@ import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @RestTest
+@Feature("Художники")
 public class ArtistRestTest {
 
     private ArtistApiClient artistApiClient;
@@ -76,7 +78,7 @@ public class ArtistRestTest {
         RestAssert.error("занятое имя", response, 409, ApiMsg.CODE_ARTIST_NAME_TAKEN, ApiMsg.ARTIST_NAME_TAKEN);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidCreates")
     @DisplayName("Создание художника отклоняет некорректные поля")
@@ -85,7 +87,7 @@ public class ArtistRestTest {
         RestAssert.error(caseName, response, 400, ApiMsg.CODE_BAD_REQUEST, message);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidUpdates")
     @DisplayName("Обновление художника отклоняет некорректные поля")
@@ -94,7 +96,7 @@ public class ArtistRestTest {
         RestAssert.error(caseName, response, 400, ApiMsg.CODE_BAD_REQUEST, message);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("unreadableBodies")
     @DisplayName("Нечитаемое тело создания художника отклоняется")

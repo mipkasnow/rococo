@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.rest;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.CountryApiClient;
 import mipkasnow.dev.rococo.data.entity.gateway.CountryEntity;
 import mipkasnow.dev.rococo.data.repository.gateway.CountryRepository;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RestTest
+@Feature("Страны")
 public class CountryRestTest {
 
     private static final int PAGE_SIZE = 10;

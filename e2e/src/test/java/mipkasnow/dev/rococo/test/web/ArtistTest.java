@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.test.web;
 
 import com.codeborne.selenide.Selenide;
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.meta.WebTest;
 import mipkasnow.dev.rococo.page.ArtistPage;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 
 @WebTest
+@Feature("Художники")
 public class ArtistTest {
 
     private static final String PHOTO = "images/artist/Aivazovsky.jpg";

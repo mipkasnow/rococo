@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.jupiter.annotation.meta;
 
+import io.qameta.allure.Epic;
 import io.qameta.allure.junit5.AllureJunit5;
 import mipkasnow.dev.rococo.jupiter.extension.ApiLoginExtension;
 import mipkasnow.dev.rococo.jupiter.extension.BrowserExtension;
@@ -13,6 +14,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Epic("UI")
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @ExtendWith({

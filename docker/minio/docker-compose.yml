@@ -30,10 +30,14 @@ services:
       - |
         set -eu
         mc alias set local http://minio:9000 user password
-        mc mb --ignore-existing local/painting
-        mc mb --ignore-existing local/museum
-        mc mb --ignore-existing local/artist
-        mc mb --ignore-existing local/avatar
+        for bucket in painting museum artist avatar; do
+          if mc ls "local/$${bucket}" >/dev/null 2>&1; then
+            echo "Bucket already exists: local/$${bucket}"
+          else
+            mc mb "local/$${bucket}"
+            echo "Bucket created: local/$${bucket}"
+          fi
+        done
 
 volumes:
   rococo-minio:

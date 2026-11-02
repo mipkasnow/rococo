@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.test.web;
 
 import com.codeborne.selenide.Selenide;
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.CountryApiClient;
 import mipkasnow.dev.rococo.api.client.MuseumApiClient;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
@@ -22,6 +23,7 @@ import java.util.List;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 
 @WebTest
+@Feature("Музеи")
 public class MuseumTest {
 
     private static final String RUSSIAN_MUSEUM = "Русский музей";

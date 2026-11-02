@@ -6,7 +6,6 @@ import com.codeborne.selenide.WebDriverRunner;
 import io.qameta.allure.Allure;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
@@ -18,7 +17,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import java.io.ByteArrayInputStream;
 
 public class BrowserExtension implements
-        BeforeEachCallback,
         AfterEachCallback,
         TestExecutionExceptionHandler,
         LifecycleMethodExecutionExceptionHandler {
@@ -47,11 +45,6 @@ public class BrowserExtension implements
                 Configuration.browserCapabilities = new FirefoxOptions();
             }
         }
-    }
-
-    @Override
-    public void beforeEach(ExtensionContext context) {
-        Allure.addAttachment("Browser", "text/plain", Configuration.browser + " " + Configuration.browserVersion);
     }
 
     @Override

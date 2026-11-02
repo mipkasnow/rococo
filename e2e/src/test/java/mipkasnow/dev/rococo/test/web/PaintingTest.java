@@ -1,6 +1,7 @@
 package mipkasnow.dev.rococo.test.web;
 
 import com.codeborne.selenide.Selenide;
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.Artist;
 import mipkasnow.dev.rococo.jupiter.annotation.Museum;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 
 @WebTest
+@Feature("Картины")
 public class PaintingTest {
 
     private static final String PHOTO = "images/painting/Fregat pod parusom, Aivazovsky.jpg";

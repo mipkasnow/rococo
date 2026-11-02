@@ -10,6 +10,9 @@
 # Cursor local settings
 .cursor/
 
+# local run-services state/logs
+.run/
+
 #back
 HELP.md
 .gradle

@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.rest;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.PaintingApiClient;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.Artist;
@@ -28,6 +29,7 @@ import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @RestTest
+@Feature("Картины")
 public class PaintingRestTest {
 
     private PaintingApiClient paintingApiClient;
@@ -174,7 +176,7 @@ public class PaintingRestTest {
         RestAssert.error("занятое название", response, 409, ApiMsg.CODE_PAINTING_TITLE_TAKEN, ApiMsg.PAINTING_TITLE_TAKEN);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidCreates")
     @DisplayName("Создание картины отклоняет некорректные поля")
@@ -183,7 +185,7 @@ public class PaintingRestTest {
         RestAssert.error(caseName, response, 400, ApiMsg.CODE_BAD_REQUEST, message);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidUpdates")
     @DisplayName("Обновление картины отклоняет некорректные поля")

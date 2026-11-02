@@ -1,5 +1,6 @@
 package mipkasnow.dev.rococo.test.rest;
 
+import io.qameta.allure.Feature;
 import mipkasnow.dev.rococo.api.client.UserApiClient;
 import mipkasnow.dev.rococo.jupiter.annotation.ApiLogin;
 import mipkasnow.dev.rococo.jupiter.annotation.meta.RestTest;
@@ -19,6 +20,7 @@ import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomString;
 import static mipkasnow.dev.rococo.utils.RandomDataUtils.randomUsername;
 
 @RestTest
+@Feature("Профиль")
 public class UserRestTest {
 
     private UserApiClient userApiClient;
@@ -64,7 +66,7 @@ public class UserRestTest {
         RestAssert.error("чужой логин", response, 403, ApiMsg.CODE_USER_FORBIDDEN, ApiMsg.USER_FORBIDDEN);
     }
 
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{0}")
     @ApiLogin
     @MethodSource("invalidUsers")
     @DisplayName("Обновление профиля отклоняет некорректные поля")

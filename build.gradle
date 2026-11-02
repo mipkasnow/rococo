@@ -47,7 +47,21 @@ subprojects {
         classpath = sourceSets.test.runtimeClasspath
 
         testLogging {
-            events "PASSED", "FAILED", "SKIPPED"
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+            displayGranularity 1
+        }
+
+        afterSuite { desc, result ->
+            if (desc.parent == null) {
+                println ""
+                println "${desc.displayName} — ${result.resultType}: " +
+                        "${result.successfulTestCount} passed, " +
+                        "${result.failedTestCount} failed, " +
+                        "${result.skippedTestCount} skipped " +
+                        "(total ${result.testCount})"
+                println ""
+            }
         }
     }
 }
